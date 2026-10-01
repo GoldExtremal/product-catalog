@@ -1,4 +1,13 @@
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
+const ASSET_ORIGIN = new URL(API_BASE_URL, window.location.origin).origin;
+
+/**
+ * @param {string} path
+ * @returns {string}
+ */
+export function resolveAssetUrl(path) {
+  return new URL(path, ASSET_ORIGIN).toString();
+}
 
 export class ApiError extends Error {
   /**

@@ -1,6 +1,7 @@
 import { useCatalog } from '../../hooks/useCatalog.js';
 import { EmptyState } from '../../components/EmptyState/EmptyState.jsx';
 import { ErrorState } from '../../components/ErrorState/ErrorState.jsx';
+import { ProductGrid } from '../../components/ProductGrid/ProductGrid.jsx';
 import { PAGE_SIZE } from '../../constants/catalog.js';
 import styles from './CatalogPage.module.css';
 
@@ -28,11 +29,7 @@ export function CatalogPage() {
       {status === 'success' && data && data.total === 0 && <EmptyState />}
 
       {status === 'success' && data && data.items.length > 0 && (
-        <ul>
-          {data.items.map((product) => (
-            <li key={product.id}>{product.title}</li>
-          ))}
-        </ul>
+        <ProductGrid products={data.items} />
       )}
     </main>
   );
