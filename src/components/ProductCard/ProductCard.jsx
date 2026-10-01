@@ -31,8 +31,9 @@ export function ProductCard({ product, eager, priority }) {
         <h2 className={styles.title}>{product.title}</h2>
         <p className={styles.price}>{formatPrice(product.price, product.currency)}</p>
         <div className={styles.meta}>
-          <span aria-label={`Рейтинг ${rating} из 5`}>
+          <span>
             <span aria-hidden="true">★ {rating}</span>
+            <span className="visually-hidden">Рейтинг {rating} из 5</span>
           </span>
           <span className={product.in_stock ? styles.inStock : styles.outOfStock}>
             {product.in_stock ? 'В наличии' : 'Нет в наличии'}
