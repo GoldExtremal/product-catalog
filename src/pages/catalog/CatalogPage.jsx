@@ -78,6 +78,7 @@ export function CatalogPage() {
       <CatalogControls
         params={params}
         categories={categories}
+        resultsTotal={status === 'success' && data ? data.total : null}
         onSearch={handleSearch}
         onFiltersChange={handleFiltersChange}
         onFiltersReset={handleFiltersReset}

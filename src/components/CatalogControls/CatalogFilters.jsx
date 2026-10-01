@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useImperativeHandle, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { Button } from '../../shared/ui/Button/Button.jsx';
 import { Checkbox } from '../../shared/ui/Checkbox/Checkbox.jsx';
@@ -13,6 +13,7 @@ import styles from './CatalogFilters.module.css';
 /** @typedef {import('../../lib/catalogParams.js').CatalogParams} CatalogParams */
 /** @typedef {import('../../hooks/useCategories.js').CategoriesState} CategoriesState */
 /** @typedef {Partial<Omit<CatalogParams, 'page' | 'q'>>} FiltersPatch */
+/** @typedef {{ flushPrice: () => void }} CatalogFiltersHandle */
 
 const SORT_OPTIONS = [
   { value: '', label: 'Сортировка' },
@@ -36,9 +37,10 @@ const toDraft = (value) => {
  *   categories: CategoriesState,
  *   onChange: (patch: FiltersPatch) => void,
  *   onReset: () => void,
+ *   ref?: import('react').Ref<CatalogFiltersHandle>,
  * }} props
  */
-export function CatalogFilters({ params, categories, onChange, onReset }) {
+export function CatalogFilters({ params, categories, onChange, onReset, ref }) {
   const [minDraft, setMinDraft] = useState(() => toDraft(params.priceMin));
   const [maxDraft, setMaxDraft] = useState(() => toDraft(params.priceMax));
   const [errors, setErrors] = useState(/** @type {{ min?: string, max?: string }} */ ({}));
@@ -106,6 +108,19 @@ export function CatalogFilters({ params, categories, onChange, onReset }) {
     const nextMax = field === 'max' ? formatted : maxDraft;
     debounce.schedule(() => commitPriceDraft(nextMin, nextMax));
   };
+
+  useImperativeHandle(ref, () => ({
+    flushPrice() {
+      debounce.cancel();
+      if (validatePriceDraft(minDraft, maxDraft).valid) {
+        commitPriceDraft(minDraft, maxDraft);
+        return;
+      }
+      setMinDraft(toDraft(params.priceMin));
+      setMaxDraft(toDraft(params.priceMax));
+      setErrors({});
+    },
+  }));
 
   /** @param {import('react').KeyboardEvent<HTMLInputElement>} event */
   const handlePriceKeyDown = (event) => {

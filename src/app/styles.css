@@ -75,6 +75,14 @@ select {
   color: inherit;
 }
 
+[hidden] {
+  display: none !important;
+}
+
+body:has(dialog[open]) {
+  overflow: hidden;
+}
+
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
