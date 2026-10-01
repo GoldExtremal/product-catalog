@@ -15,5 +15,8 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: { proxy },
     preview: { proxy },
+    test: {
+      include: ['src/**/*.test.js'],
+    },
   };
 });

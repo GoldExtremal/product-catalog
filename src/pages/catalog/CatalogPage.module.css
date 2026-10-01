@@ -1,0 +1,16 @@
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.title {
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+.count {
+  min-height: 1.5em;
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+}

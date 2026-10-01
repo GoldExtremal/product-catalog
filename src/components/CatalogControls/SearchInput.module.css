@@ -1,0 +1,10 @@
+.form {
+  width: 100%;
+}
+
+.form .input {
+  padding-left: calc(var(--space-3) + 28px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%235a6270' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
+  background-position: left var(--space-3) center;
+  background-repeat: no-repeat;
+}

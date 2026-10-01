@@ -1,0 +1,86 @@
+.filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'category'
+    'sort'
+    'price'
+    'extras';
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.category {
+  grid-area: category;
+}
+
+.sort {
+  grid-area: sort;
+}
+
+.price {
+  grid-area: price;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.extras {
+  grid-area: extras;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+
+.priceRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-2);
+}
+
+.dash {
+  display: flex;
+  align-items: center;
+  height: var(--control-height);
+  color: var(--color-text-muted);
+}
+
+.error {
+  margin-top: var(--space-1);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: var(--color-danger);
+}
+
+.reset {
+  padding: 0 var(--space-3);
+}
+
+@media (min-width: 600px) {
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      'category sort'
+      'price extras';
+  }
+
+  .extras {
+    justify-content: flex-start;
+  }
+
+  .reset {
+    margin-left: auto;
+  }
+}
+
+@media (min-width: 1200px) {
+  .filters {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr) auto;
+    grid-template-areas: 'category sort price extras';
+  }
+}

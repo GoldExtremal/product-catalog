@@ -6,6 +6,13 @@
   --color-border: #d5d9e0;
   --color-accent: #1f5fd1;
   --color-accent-contrast: #ffffff;
+  --color-accent-hover: #194fb0;
+  --color-accent-soft: #eef3fd;
+  --color-placeholder: #e9ecf1;
+  --color-field: #eef0f4;
+  --color-field-hover: #e4e7ed;
+  --color-field-focus: #dfe3ea;
+  --color-success: #1a7f37;
   --color-danger: #b42318;
   --color-focus: #1f5fd1;
 
@@ -18,6 +25,7 @@
 
   --radius-sm: 6px;
   --radius-md: 10px;
+  --radius-lg: 14px;
   --control-height: 44px;
   --shadow-card: 0 1px 2px rgb(16 24 40 / 6%), 0 1px 3px rgb(16 24 40 / 10%);
 
@@ -68,4 +76,16 @@ select {
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
