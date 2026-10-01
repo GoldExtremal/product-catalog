@@ -7,6 +7,7 @@ const APP_URL = process.env.MEASURE_URL ?? 'http://localhost:8080/';
 const MOCK_API_URL = process.env.MEASURE_MOCK_API_URL ?? 'http://localhost:4000';
 const RUNS = Number(process.env.MEASURE_RUNS ?? 3);
 const OUT_DIR = new URL('../lighthouse/', import.meta.url);
+const SUMMARY_FILE = new URL('../docs/lighthouse-summary.json', import.meta.url);
 
 const METRICS = [
   ['first-contentful-paint', 'FCP', 'ms'],
@@ -141,7 +142,8 @@ async function main() {
       METRICS.map(([id]) => [id, median(runs.map((lhr) => lhr.audits[id].numericValue ?? 0))]),
     ),
   };
-  await writeFile(new URL('summary.json', OUT_DIR), `${JSON.stringify(summary, null, 2)}\n`);
+  await mkdir(new URL('.', SUMMARY_FILE), { recursive: true });
+  await writeFile(SUMMARY_FILE, `${JSON.stringify(summary, null, 2)}\n`);
 
   console.log('\n## Lighthouse — медиана из', RUNS, 'прогонов\n');
   console.log(`URL: ${summary.url}`);
