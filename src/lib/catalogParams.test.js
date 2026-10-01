@@ -5,6 +5,7 @@ import {
   parseCatalogParams,
   serializeCatalogParams,
   toApiQuery,
+  validatePriceDraft,
   withFilters,
   withPage,
 } from './catalogParams.js';
@@ -134,5 +135,33 @@ describe('withFilters и withPage', () => {
 
   it('нормализует некорректную страницу', () => {
     expect(withPage(onPage3, 0).page).toBe(1);
+  });
+});
+
+describe('validatePriceDraft', () => {
+  it('принимает пустой диапазон', () => {
+    expect(validatePriceDraft('', '')).toEqual({ priceMin: null, priceMax: null, errors: {}, valid: true });
+  });
+
+  it('убирает пробелы-разделители разрядов', () => {
+    expect(validatePriceDraft('1 000', ' 30 000 ')).toMatchObject({ priceMin: 1000, priceMax: 30000, valid: true });
+  });
+
+  it('помечает нечисловое и отрицательное значение', () => {
+    expect(validatePriceDraft('abc', '-5')).toMatchObject({
+      valid: false,
+      errors: { min: expect.any(String), max: expect.any(String) },
+    });
+  });
+
+  it('помечает максимум при min > max', () => {
+    const result = validatePriceDraft('500', '100');
+    expect(result.valid).toBe(false);
+    expect(result.errors.min).toBeUndefined();
+    expect(result.errors.max).toEqual(expect.any(String));
+  });
+
+  it('допускает min = max', () => {
+    expect(validatePriceDraft('100', '100').valid).toBe(true);
   });
 });

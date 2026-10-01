@@ -40,7 +40,9 @@ export function SearchInput({ value, onSearch }) {
       <Input
         type="search"
         label="Поиск по названию"
-        placeholder="Например, кроссовки"
+        hideLabel
+        inputClassName={styles.input}
+        placeholder="Поиск по названию"
         autoComplete="off"
         enterKeyHint="search"
         data-testid="search-input"

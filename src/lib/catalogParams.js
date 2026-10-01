@@ -102,6 +102,37 @@ export function parsePrice(value) {
 }
 
 /**
+ * @typedef {object} PriceDraftResult
+ * @property {number | null} priceMin
+ * @property {number | null} priceMax
+ * @property {{ min?: string, max?: string }} errors
+ * @property {boolean} valid
+ */
+
+/**
+ * @param {string} minText
+ * @param {string} maxText
+ * @returns {PriceDraftResult}
+ */
+export function validatePriceDraft(minText, maxText) {
+  const minValue = minText.replace(/\s/g, '');
+  const maxValue = maxText.replace(/\s/g, '');
+  const priceMin = parsePrice(minValue);
+  const priceMax = parsePrice(maxValue);
+  /** @type {{ min?: string, max?: string }} */
+  const errors = {};
+
+  if (minValue !== '' && priceMin === null) errors.min = 'Введите число не меньше 0';
+  if (maxValue !== '' && priceMax === null) errors.max = 'Введите число не меньше 0';
+  if (!errors.min && !errors.max && isPriceRangeInvalid({ priceMin, priceMax })) {
+    errors.max = 'Максимум не может быть меньше минимума';
+  }
+
+  const valid = !errors.min && !errors.max;
+  return { priceMin, priceMax, errors, valid };
+}
+
+/**
  * @param {CatalogParams} params
  * @returns {URLSearchParams}
  */

@@ -1,15 +1,19 @@
 import { useCallback } from 'react';
 import { useCatalog } from '../../hooks/useCatalog.js';
 import { useCatalogParams } from '../../hooks/useCatalogParams.js';
-import { SearchInput } from '../../components/CatalogControls/SearchInput.jsx';
+import { useCategories } from '../../hooks/useCategories.js';
+import { CatalogControls } from '../../components/CatalogControls/CatalogControls.jsx';
 import { EmptyState } from '../../components/EmptyState/EmptyState.jsx';
 import { ErrorState } from '../../components/ErrorState/ErrorState.jsx';
 import { ProductGrid } from '../../components/ProductGrid/ProductGrid.jsx';
-import { toApiQuery, withFilters } from '../../lib/catalogParams.js';
+import { DEFAULT_PARAMS, toApiQuery, withFilters } from '../../lib/catalogParams.js';
 import styles from './CatalogPage.module.css';
+
+/** @typedef {import('../../components/CatalogControls/CatalogFilters.jsx').FiltersPatch} FiltersPatch */
 
 export function CatalogPage() {
   const { params, navigate } = useCatalogParams();
+  const categories = useCategories();
   const { status, data, retry } = useCatalog(toApiQuery(params));
 
   const handleSearch = useCallback(
@@ -18,13 +22,28 @@ export function CatalogPage() {
     [navigate],
   );
 
+  const handleFiltersChange = useCallback(
+    /** @param {FiltersPatch} patch */
+    (patch) => navigate((current) => withFilters(current, patch)),
+    [navigate],
+  );
+
+  const handleFiltersReset = useCallback(
+    () => navigate((current) => ({ ...DEFAULT_PARAMS, q: current.q })),
+    [navigate],
+  );
+
   return (
     <main className={styles.page}>
       <h1 className={styles.title}>Каталог товаров</h1>
 
-      <div className={styles.controls}>
-        <SearchInput value={params.q} onSearch={handleSearch} />
-      </div>
+      <CatalogControls
+        params={params}
+        categories={categories}
+        onSearch={handleSearch}
+        onFiltersChange={handleFiltersChange}
+        onFiltersReset={handleFiltersReset}
+      />
 
       <p data-testid="results-count" aria-live="polite" className={styles.count}>
         {status === 'success' && data ? `Найдено товаров: ${data.total}` : ''}
