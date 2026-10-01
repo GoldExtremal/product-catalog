@@ -141,16 +141,30 @@ export function CatalogFilters({ params, categories, onChange, onReset }) {
 
   return (
     <div className={styles.filters}>
-      <Select
-        className={styles.category}
-        label="Категория"
-        hideLabel
-        data-testid="filter-category"
-        options={categoryOptions}
-        value={params.category ?? ''}
-        aria-busy={categories.status === 'loading' || undefined}
-        onChange={(event) => onChange({ category: event.target.value || null })}
-      />
+      <div className={styles.category}>
+        <Select
+          label="Категория"
+          hideLabel
+          data-testid="filter-category"
+          options={categoryOptions}
+          value={params.category ?? ''}
+          aria-busy={categories.status === 'loading' || undefined}
+          onChange={(event) => onChange({ category: event.target.value || null })}
+        />
+        {categories.status === 'error' && (
+          <p className={styles.note} role="status">
+            Категории не загрузились.
+            <Button variant="ghost" className={styles.noteAction} onClick={categories.retry}>
+              Повторить
+            </Button>
+          </p>
+        )}
+        {categories.status === 'success' && categories.items.length === 0 && (
+          <p className={styles.note} role="status">
+            Список категорий пуст.
+          </p>
+        )}
+      </div>
 
       <Select
         className={styles.sort}

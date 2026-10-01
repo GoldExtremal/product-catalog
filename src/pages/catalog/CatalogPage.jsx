@@ -7,6 +7,7 @@ import { EmptyState } from '../../components/EmptyState/EmptyState.jsx';
 import { ErrorState } from '../../components/ErrorState/ErrorState.jsx';
 import { Pagination } from '../../components/Pagination/Pagination.jsx';
 import { ProductGrid } from '../../components/ProductGrid/ProductGrid.jsx';
+import { SkeletonGrid } from '../../components/SkeletonGrid/SkeletonGrid.jsx';
 import { PAGE_SIZE } from '../../constants/catalog.js';
 import { describeCatalogError } from '../../lib/catalogErrors.js';
 import {
@@ -44,6 +45,8 @@ export function CatalogPage() {
     [navigate],
   );
 
+  const handleResetAll = useCallback(() => navigate(() => DEFAULT_PARAMS), [navigate]);
+
   const handlePriceReset = useCallback(
     () => navigate((current) => withFilters(current, { priceMin: null, priceMax: null })),
     [navigate],
@@ -57,6 +60,10 @@ export function CatalogPage() {
 
   const totalPages = data ? getTotalPages(data.total, PAGE_SIZE) : 1;
   const errorView = status === 'error' ? describeCatalogError(error) : null;
+  const showSkeleton = status === 'loading' && (!data || data.page !== params.page);
+  const showUpdating = status === 'loading' && !showSkeleton;
+  const showGrid =
+    !showSkeleton && status !== 'idle' && data !== null && data.items.length > 0;
 
   useEffect(() => {
     if (status !== 'success' || !data || data.total === 0) return;
@@ -76,15 +83,17 @@ export function CatalogPage() {
         onFiltersReset={handleFiltersReset}
       />
 
-      <p data-testid="results-count" aria-live="polite" className={styles.count}>
-        {status === 'success' && data ? `Найдено товаров: ${data.total}` : ''}
-      </p>
-
-      {status === 'loading' && (
-        <p data-testid="state-loading" role="status">
-          Загрузка…
+      <div className={styles.summary}>
+        <p data-testid="results-count" aria-live="polite" className={styles.count}>
+          {status === 'success' && data ? `Найдено товаров: ${data.total}` : ''}
         </p>
-      )}
+        {showUpdating && (
+          <p data-testid="state-loading" role="status" className={styles.updating}>
+            <span className={styles.spinner} aria-hidden="true" />
+            Обновляем результаты…
+          </p>
+        )}
+      </div>
 
       {priceRangeInvalid && (
         <ErrorState
@@ -105,10 +114,21 @@ export function CatalogPage() {
         />
       )}
 
-      {status === 'success' && data && data.total === 0 && <EmptyState />}
+      {showSkeleton && <SkeletonGrid />}
 
-      {status === 'success' && data && data.items.length > 0 && (
-        <ProductGrid products={data.items} />
+      {status === 'success' && data && data.total === 0 && <EmptyState onReset={handleResetAll} />}
+
+      {showGrid && status === 'error' && (
+        <p className={styles.staleNote}>Ниже — результаты предыдущего запроса.</p>
+      )}
+
+      {showGrid && (
+        <div
+          className={status === 'success' ? undefined : styles.stale}
+          aria-busy={status === 'loading' || undefined}
+        >
+          <ProductGrid products={data.items} />
+        </div>
       )}
 
       {(status === 'success' || status === 'loading') && data && data.total > 0 && (

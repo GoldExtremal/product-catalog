@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getCategories } from '../api/categories.js';
 
 /** @typedef {import('../api/categories.js').Category} Category */
@@ -7,11 +7,13 @@ import { getCategories } from '../api/categories.js';
  * @typedef {object} CategoriesState
  * @property {'loading' | 'success' | 'error'} status
  * @property {Category[]} items
+ * @property {() => void} retry
  */
 
 export function useCategories() {
+  const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState(
-    /** @type {CategoriesState} */ ({ status: 'loading', items: [] }),
+    /** @type {Omit<CategoriesState, 'retry'>} */ ({ status: 'loading', items: [] }),
   );
 
   useEffect(() => {
@@ -23,7 +25,12 @@ export function useCategories() {
       },
     );
     return () => controller.abort();
+  }, [attempt]);
+
+  const retry = useCallback(() => {
+    setState({ status: 'loading', items: [] });
+    setAttempt((n) => n + 1);
   }, []);
 
-  return state;
+  return { ...state, retry };
 }

@@ -1,4 +1,5 @@
 import { Button } from '../../shared/ui/Button/Button.jsx';
+import styles from './ErrorState.module.css';
 
 /**
  * @param {{
@@ -11,9 +12,9 @@ import { Button } from '../../shared/ui/Button/Button.jsx';
  */
 export function ErrorState({ title, message, actionLabel, onAction, actionTestId }) {
   return (
-    <div data-testid="state-error" role="alert">
-      <h2>{title}</h2>
-      <p>{message}</p>
+    <div className={styles.error} data-testid="state-error" role="alert">
+      <h2 className={styles.title}>{title}</h2>
+      <p className={styles.message}>{message}</p>
       <Button variant="primary" data-testid={actionTestId} onClick={onAction}>
         {actionLabel}
       </Button>

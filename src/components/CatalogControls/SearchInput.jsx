@@ -10,6 +10,12 @@ import styles from './SearchInput.module.css';
  */
 export function SearchInput({ value, onSearch }) {
   const [draft, setDraft] = useState(value);
+  const [syncedValue, setSyncedValue] = useState(value);
+  const [committed, setCommitted] = useState(value);
+  if (value !== syncedValue) {
+    setSyncedValue(value);
+    if (value !== committed) setDraft(value);
+  }
   const debounce = useDebounce(SEARCH_DEBOUNCE_MS);
 
   useEffect(() => {
@@ -21,18 +27,25 @@ export function SearchInput({ value, onSearch }) {
     return () => window.removeEventListener('popstate', onPopState);
   }, [debounce]);
 
+  /** @param {string} text */
+  const commit = (text) => {
+    const q = text.trim();
+    setCommitted(q);
+    onSearch(q);
+  };
+
   /** @param {import('react').ChangeEvent<HTMLInputElement>} event */
   const handleChange = (event) => {
     const next = event.target.value;
     setDraft(next);
-    debounce.schedule(() => onSearch(next.trim()));
+    debounce.schedule(() => commit(next));
   };
 
   /** @param {import('react').FormEvent<HTMLFormElement>} event */
   const handleSubmit = (event) => {
     event.preventDefault();
     debounce.cancel();
-    onSearch(draft.trim());
+    commit(draft);
   };
 
   return (

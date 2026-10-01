@@ -26,6 +26,9 @@ export function useCatalog(queryKey) {
   const requestIdRef = useRef(0);
   const requestKey = `${queryKey}#${retryCount}`;
   const cached = queryKey === null ? undefined : productsCache.peek(queryKey);
+  if (cached && result.key !== requestKey) {
+    setResult({ key: requestKey, data: cached, error: null });
+  }
 
   useEffect(() => {
     const requestId = ++requestIdRef.current;
