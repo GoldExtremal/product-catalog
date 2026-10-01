@@ -31,7 +31,7 @@ function countActiveFilters(params) {
  *   categories: import('../../hooks/useCategories.js').CategoriesState,
  *   resultsTotal: number | null,
  *   onSearch: (q: string) => void,
- *   onFiltersChange: (patch: FiltersPatch) => void,
+ *   onFiltersChange: (patch: FiltersPatch, mode?: import('./CatalogFilters.jsx').HistoryMode) => void,
  *   onFiltersReset: () => void,
  * }} props
  */

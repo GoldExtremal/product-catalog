@@ -21,6 +21,7 @@ import { getTotalPages } from '../../lib/pagination.js';
 import styles from './CatalogPage.module.css';
 
 /** @typedef {import('../../components/CatalogControls/CatalogFilters.jsx').FiltersPatch} FiltersPatch */
+/** @typedef {import('../../components/CatalogControls/CatalogFilters.jsx').HistoryMode} HistoryMode */
 
 export function CatalogPage() {
   const { params, navigate, replace } = useCatalogParams();
@@ -35,9 +36,15 @@ export function CatalogPage() {
   );
 
   const handleFiltersChange = useCallback(
-    /** @param {FiltersPatch} patch */
-    (patch) => navigate((current) => withFilters(current, patch)),
-    [navigate],
+    /**
+     * @param {FiltersPatch} patch
+     * @param {HistoryMode} [mode]
+     */
+    (patch, mode = 'push') => {
+      const apply = mode === 'replace' ? replace : navigate;
+      apply((current) => withFilters(current, patch));
+    },
+    [navigate, replace],
   );
 
   const handleFiltersReset = useCallback(
