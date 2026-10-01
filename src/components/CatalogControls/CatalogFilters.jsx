@@ -244,7 +244,7 @@ export function CatalogFilters({ params, categories, onChange, onReset, ref }) {
           checked={params.inStock}
           onChange={(event) => onChange({ inStock: event.target.checked })}
         />
-        <Button variant="ghost" className={styles.reset} disabled={!hasFilters} onClick={handleReset}>
+        <Button variant="danger" className={styles.reset} disabled={!hasFilters} onClick={handleReset}>
           Сбросить
         </Button>
       </div>

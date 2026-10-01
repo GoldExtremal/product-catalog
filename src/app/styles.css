@@ -10,10 +10,11 @@
   --color-accent-soft: #eef3fd;
   --color-placeholder: #e9ecf1;
   --color-field: #eef0f4;
-  --color-field-hover: #e4e7ed;
-  --color-field-focus: #dfe3ea;
+  --color-control-border: #8a93a3;
+  --color-control-border-hover: #5a6270;
   --color-success: #1a7f37;
   --color-danger: #b42318;
+  --color-danger-hover: #912018;
   --color-danger-soft: #fef3f2;
   --color-danger-border: #fecdca;
   --color-focus: #1f5fd1;
@@ -26,6 +27,8 @@
   --space-8: 32px;
 
   --radius-sm: 6px;
+  --radius-control: 6px;
+  --radius-panel: 8px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --control-height: 44px;

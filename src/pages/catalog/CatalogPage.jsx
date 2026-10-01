@@ -152,7 +152,9 @@ export function CatalogPage() {
 
       {showGrid && (
         <div
-          className={status === 'success' ? undefined : styles.stale}
+          className={
+            status === 'loading' ? styles.stale : status === 'error' ? styles.staleError : undefined
+          }
           aria-busy={status === 'loading' || undefined}
         >
           <ProductGrid products={data.items} />
