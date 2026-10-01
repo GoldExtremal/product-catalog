@@ -1,18 +1,30 @@
-import { useState } from 'react';
+import { useCallback } from 'react';
 import { useCatalog } from '../../hooks/useCatalog.js';
+import { useCatalogParams } from '../../hooks/useCatalogParams.js';
+import { SearchInput } from '../../components/CatalogControls/SearchInput.jsx';
 import { EmptyState } from '../../components/EmptyState/EmptyState.jsx';
 import { ErrorState } from '../../components/ErrorState/ErrorState.jsx';
 import { ProductGrid } from '../../components/ProductGrid/ProductGrid.jsx';
-import { parseCatalogParams, toApiQuery } from '../../lib/catalogParams.js';
+import { toApiQuery, withFilters } from '../../lib/catalogParams.js';
 import styles from './CatalogPage.module.css';
 
 export function CatalogPage() {
-  const [params] = useState(() => parseCatalogParams(window.location.search));
+  const { params, navigate } = useCatalogParams();
   const { status, data, retry } = useCatalog(toApiQuery(params));
+
+  const handleSearch = useCallback(
+    /** @param {string} q */
+    (q) => navigate((current) => withFilters(current, { q })),
+    [navigate],
+  );
 
   return (
     <main className={styles.page}>
       <h1 className={styles.title}>Каталог товаров</h1>
+
+      <div className={styles.controls}>
+        <SearchInput value={params.q} onSearch={handleSearch} />
+      </div>
 
       <p data-testid="results-count" aria-live="polite" className={styles.count}>
         {status === 'success' && data ? `Найдено товаров: ${data.total}` : ''}

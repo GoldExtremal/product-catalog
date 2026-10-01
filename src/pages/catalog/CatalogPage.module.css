@@ -9,6 +9,10 @@
   line-height: 1.25;
 }
 
+.controls {
+  margin-top: var(--space-4);
+}
+
 .count {
   min-height: 1.5em;
   margin-top: var(--space-2);
