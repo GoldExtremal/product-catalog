@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useCatalog } from '../../hooks/useCatalog.js';
 import { useCatalogParams } from '../../hooks/useCatalogParams.js';
 import { useCategories } from '../../hooks/useCategories.js';
@@ -52,11 +52,31 @@ export function CatalogPage() {
     [navigate],
   );
 
+  const summaryRef = useRef(/** @type {HTMLDivElement | null} */ (null));
+  const countRef = useRef(/** @type {HTMLParagraphElement | null} */ (null));
+  const errorTitleRef = useRef(/** @type {HTMLHeadingElement | null} */ (null));
+  const focusAfterPageChangeRef = useRef(false);
+
   const handlePageChange = useCallback(
     /** @param {number} page */
-    (page) => navigate((current) => withPage(current, page)),
+    (page) => {
+      focusAfterPageChangeRef.current = true;
+      navigate((current) => withPage(current, page));
+      summaryRef.current?.scrollIntoView({ block: 'start' });
+    },
     [navigate],
   );
+
+  useEffect(() => {
+    if (!focusAfterPageChangeRef.current) return;
+    if (status === 'success') {
+      focusAfterPageChangeRef.current = false;
+      countRef.current?.focus({ preventScroll: true });
+    } else if (status === 'error') {
+      focusAfterPageChangeRef.current = false;
+      errorTitleRef.current?.focus({ preventScroll: true });
+    }
+  }, [status, data]);
 
   const totalPages = data ? getTotalPages(data.total, PAGE_SIZE) : 1;
   const errorView = status === 'error' ? describeCatalogError(error) : null;
@@ -84,8 +104,14 @@ export function CatalogPage() {
         onFiltersReset={handleFiltersReset}
       />
 
-      <div className={styles.summary}>
-        <p data-testid="results-count" aria-live="polite" className={styles.count}>
+      <div ref={summaryRef} className={styles.summary}>
+        <p
+          ref={countRef}
+          data-testid="results-count"
+          aria-live="polite"
+          tabIndex={-1}
+          className={styles.count}
+        >
           {status === 'success' && data ? `Найдено товаров: ${data.total}` : ''}
         </p>
         {showUpdating && (
@@ -107,6 +133,7 @@ export function CatalogPage() {
 
       {errorView && (
         <ErrorState
+          titleRef={errorTitleRef}
           title={errorView.title}
           message={errorView.message}
           {...(errorView.action === 'retry'

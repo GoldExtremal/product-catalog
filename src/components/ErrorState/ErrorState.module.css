@@ -14,6 +14,10 @@
   font-size: 1.25rem;
 }
 
+.title:focus {
+  outline: none;
+}
+
 .message {
   max-width: 52ch;
   color: var(--color-text-muted);
