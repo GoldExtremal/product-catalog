@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { parseCatalogParams, serializeCatalogParams } from '../lib/catalogParams.js';
 
 /** @typedef {import('../lib/catalogParams.js').CatalogParams} CatalogParams */
+/** @typedef {(current: CatalogParams) => CatalogParams} ParamsUpdate */
 
 export function useCatalogParams() {
   const [params, setParams] = useState(readParams);
@@ -12,20 +13,37 @@ export function useCatalogParams() {
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
-  const navigate = useCallback(
-    /** @param {(current: CatalogParams) => CatalogParams} update */
-    (update) => {
+  const update = useCallback(
+    /**
+     * @param {ParamsUpdate} change
+     * @param {'push' | 'replace'} mode
+     */
+    (change, mode) => {
       const current = readParams();
-      const search = serializeCatalogParams(update(current));
+      const search = serializeCatalogParams(change(current));
       if (search === serializeCatalogParams(current)) return;
       const { pathname } = window.location;
-      window.history.pushState(null, '', search ? `${pathname}?${search}` : pathname);
+      const url = search ? `${pathname}?${search}` : pathname;
+      if (mode === 'push') window.history.pushState(null, '', url);
+      else window.history.replaceState(null, '', url);
       setParams(parseCatalogParams(search));
     },
     [],
   );
 
-  return { params, navigate };
+  const navigate = useCallback(
+    /** @param {ParamsUpdate} change */
+    (change) => update(change, 'push'),
+    [update],
+  );
+
+  const replace = useCallback(
+    /** @param {ParamsUpdate} change */
+    (change) => update(change, 'replace'),
+    [update],
+  );
+
+  return { params, navigate, replace };
 }
 
 /** @returns {CatalogParams} */
