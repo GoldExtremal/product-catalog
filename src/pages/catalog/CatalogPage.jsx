@@ -1,14 +1,14 @@
+import { useState } from 'react';
 import { useCatalog } from '../../hooks/useCatalog.js';
 import { EmptyState } from '../../components/EmptyState/EmptyState.jsx';
 import { ErrorState } from '../../components/ErrorState/ErrorState.jsx';
 import { ProductGrid } from '../../components/ProductGrid/ProductGrid.jsx';
-import { PAGE_SIZE } from '../../constants/catalog.js';
+import { parseCatalogParams, toApiQuery } from '../../lib/catalogParams.js';
 import styles from './CatalogPage.module.css';
 
-const INITIAL_QUERY = new URLSearchParams({ limit: String(PAGE_SIZE) }).toString();
-
 export function CatalogPage() {
-  const { status, data, retry } = useCatalog(INITIAL_QUERY);
+  const [params] = useState(() => parseCatalogParams(window.location.search));
+  const { status, data, retry } = useCatalog(toApiQuery(params));
 
   return (
     <main className={styles.page}>
