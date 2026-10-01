@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { countText, fetchProducts, resetMockApi, setChaos, trackProductRequests } from './helpers.js';
+import { fetchProducts, resetMockApi, setChaos, trackProductRequests } from './helpers.js';
 
 test.beforeEach(async ({ request }) => {
   await resetMockApi(request);
@@ -31,7 +31,7 @@ test('при error_rate 1 видна ошибка, а Retry после error_rat
   await page.getByTestId('retry-button').click();
 
   await expect(page.getByTestId('state-error')).toHaveCount(0);
-  await expect(page.getByTestId('results-count')).toHaveText(countText(expected.total));
+  await expect(page.getByTestId('results-count')).toHaveText(String(expected.total));
   await expect(page).toHaveURL(`/?${search}`);
   const titles = await page.getByTestId('product-card').locator('h2').allTextContents();
   expect(titles).toEqual(expected.items.map((item) => item.title));
@@ -39,7 +39,7 @@ test('при error_rate 1 видна ошибка, а Retry после error_rat
 
 test('ошибка при смене фильтра сохраняет фильтры и прежнюю выдачу', async ({ page, request }) => {
   await page.goto('/');
-  await expect(page.getByTestId('results-count')).toHaveText(countText(500));
+  await expect(page.getByTestId('results-count')).toHaveText('500');
   await expect(page.getByTestId('filter-category').locator('option[value="bags"]')).toHaveCount(1);
 
   await setChaos(request, { error_rate: 1 });
@@ -78,4 +78,30 @@ test('ответ 400 на некорректную ссылку предлага
   await page.getByRole('button', { name: 'Сбросить фильтры' }).click();
   await expect(page).toHaveURL('/?q=run');
   await expect(page.getByTestId('product-card').first()).toBeVisible();
+});
+
+test('возврат к выборке, которая раньше не загрузилась, показывает загрузку, а не старую ошибку', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/');
+  await expect(page.getByTestId('results-count')).toHaveText('500');
+  await expect(page.getByTestId('filter-category').locator('option[value="bags"]')).toHaveCount(1);
+
+  await setChaos(request, { error_rate: 1 });
+  await page.getByTestId('filter-category').selectOption('bags');
+  await expect(page.getByTestId('state-error')).toBeVisible();
+
+  await setChaos(request, { error_rate: 0, latency_ms: [1500, 1500] });
+  await page.getByTestId('filter-category').selectOption('shoes');
+  await expect(page.getByTestId('state-loading')).toBeVisible();
+  await page.goBack();
+
+  await expect(page).toHaveURL('/?category=bags');
+  await expect(page.getByTestId('state-error')).toHaveCount(0, { timeout: 1000 });
+  await expect(page.getByTestId('state-loading')).toBeVisible({ timeout: 1000 });
+
+  const expected = await fetchProducts(request, 'category=bags&limit=1');
+  await expect(page.getByTestId('results-count')).toHaveText(String(expected.total));
+  await expect(page.getByTestId('state-error')).toHaveCount(0);
 });

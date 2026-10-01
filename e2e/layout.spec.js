@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { countText, resetMockApi } from './helpers.js';
+import { resetMockApi } from './helpers.js';
 
 const SINGLE_TEST_IDS = [
   'search-input',
@@ -22,7 +22,7 @@ for (const width of [320, 599, 600, 601, 1280]) {
   test(`на ${width} px каждый одиночный testid встречается ровно один раз`, async ({ page }) => {
     await page.setViewportSize({ width, height: 800 });
     await page.goto('/');
-    await expect(page.getByTestId('results-count')).toHaveText(countText(500));
+    await expect(page.getByTestId('results-count')).toHaveText('500');
 
     for (const id of SINGLE_TEST_IDS) await expect(page.getByTestId(id)).toHaveCount(1);
     await expect(page.getByTestId('product-card')).toHaveCount(24);
@@ -39,7 +39,7 @@ test.describe('ширина 320 px', () => {
 
   test('нет горизонтального скролла, пагинация компактная', async ({ page }) => {
     await page.goto('/?page=10');
-    await expect(page.getByTestId('results-count')).toHaveText(countText(500));
+    await expect(page.getByTestId('results-count')).toHaveText('500');
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -53,7 +53,7 @@ test.describe('ширина 320 px', () => {
     page,
   }) => {
     await page.goto('/');
-    await expect(page.getByTestId('results-count')).toHaveText(countText(500));
+    await expect(page.getByTestId('results-count')).toHaveText('500');
 
     const open = page.getByTestId('filters-open');
     const dialog = page.getByRole('dialog', { name: 'Фильтры' });

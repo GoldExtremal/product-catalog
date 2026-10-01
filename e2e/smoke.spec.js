@@ -8,7 +8,7 @@ test.beforeEach(async ({ request }) => {
 test('страница открывается', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByTestId('results-count')).toContainText('500');
+  await expect(page.getByTestId('results-count')).toHaveText('500');
   await expect(page.getByTestId('state-loading')).toHaveCount(0);
 });
 

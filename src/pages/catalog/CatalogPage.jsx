@@ -21,6 +21,7 @@ import { getTotalPages } from '../../lib/pagination.js';
 import styles from './CatalogPage.module.css';
 
 /** @typedef {import('../../components/CatalogControls/CatalogFilters.jsx').FiltersPatch} FiltersPatch */
+/** @typedef {import('../../components/CatalogControls/CatalogFilters.jsx').HistoryMode} HistoryMode */
 
 export function CatalogPage() {
   const { params, navigate, replace } = useCatalogParams();
@@ -35,9 +36,15 @@ export function CatalogPage() {
   );
 
   const handleFiltersChange = useCallback(
-    /** @param {FiltersPatch} patch */
-    (patch) => navigate((current) => withFilters(current, patch)),
-    [navigate],
+    /**
+     * @param {FiltersPatch} patch
+     * @param {HistoryMode} [mode]
+     */
+    (patch, mode = 'push') => {
+      const apply = mode === 'replace' ? replace : navigate;
+      apply((current) => withFilters(current, patch));
+    },
+    [navigate, replace],
   );
 
   const handleFiltersReset = useCallback(
@@ -105,14 +112,9 @@ export function CatalogPage() {
       />
 
       <div ref={summaryRef} className={styles.summary}>
-        <p
-          ref={countRef}
-          data-testid="results-count"
-          aria-live="polite"
-          tabIndex={-1}
-          className={styles.count}
-        >
-          {status === 'success' && data ? `Найдено товаров: ${data.total}` : ''}
+        <p ref={countRef} aria-live="polite" tabIndex={-1} className={styles.count}>
+          {status === 'success' && data && 'Найдено товаров: '}
+          <span data-testid="results-count">{status === 'success' && data ? data.total : ''}</span>
         </p>
         {showUpdating && (
           <p data-testid="state-loading" role="status" className={styles.updating}>
@@ -152,7 +154,9 @@ export function CatalogPage() {
 
       {showGrid && (
         <div
-          className={status === 'success' ? undefined : styles.stale}
+          className={
+            status === 'loading' ? styles.stale : status === 'error' ? styles.staleError : undefined
+          }
           aria-busy={status === 'loading' || undefined}
         >
           <ProductGrid products={data.items} />

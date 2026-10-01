@@ -1,4 +1,4 @@
-import { useEffect, useId, useImperativeHandle, useState } from 'react';
+import { useEffect, useId, useImperativeHandle, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { Button } from '../../shared/ui/Button/Button.jsx';
 import { Checkbox } from '../../shared/ui/Checkbox/Checkbox.jsx';
@@ -14,6 +14,7 @@ import styles from './CatalogFilters.module.css';
 /** @typedef {import('../../hooks/useCategories.js').CategoriesState} CategoriesState */
 /** @typedef {Partial<Omit<CatalogParams, 'page' | 'q'>>} FiltersPatch */
 /** @typedef {{ flushPrice: () => void }} CatalogFiltersHandle */
+/** @typedef {'push' | 'replace'} HistoryMode */
 
 const SORT_OPTIONS = [
   { value: '', label: 'Сортировка' },
@@ -35,7 +36,7 @@ const toDraft = (value) => {
  * @param {{
  *   params: CatalogParams,
  *   categories: CategoriesState,
- *   onChange: (patch: FiltersPatch) => void,
+ *   onChange: (patch: FiltersPatch, mode?: HistoryMode) => void,
  *   onReset: () => void,
  *   ref?: import('react').Ref<CatalogFiltersHandle>,
  * }} props
@@ -56,10 +57,12 @@ export function CatalogFilters({ params, categories, onChange, onReset, ref }) {
   const priceError = [...new Set([errors.min, errors.max].filter(Boolean))].join(' ');
 
   const debounce = useDebounce(PRICE_DEBOUNCE_MS);
+  const priceEntryRef = useRef(/** @type {string | null} */ (null));
 
   useEffect(() => {
     const onPopState = () => {
       debounce.cancel();
+      priceEntryRef.current = null;
       const fromUrl = parseCatalogParams(window.location.search);
       setMinDraft(toDraft(fromUrl.priceMin));
       setMaxDraft(toDraft(fromUrl.priceMax));
@@ -70,16 +73,38 @@ export function CatalogFilters({ params, categories, onChange, onReset, ref }) {
   }, [debounce]);
 
   /**
+   * @param {number | null} priceMin
+   * @param {number | null} priceMax
+   */
+  const applyPrice = (priceMin, priceMax) => {
+    const before = window.location.search;
+    const ownsEntry = priceEntryRef.current !== null && priceEntryRef.current === before;
+    onChange({ priceMin, priceMax }, ownsEntry ? 'replace' : 'push');
+    if (window.location.search !== before) priceEntryRef.current = window.location.search;
+  };
+
+  /**
+   * @param {string} min
+   * @param {string} max
+   */
+  const applyPriceWhileTyping = (min, max) => {
+    const result = validatePriceDraft(min, max);
+    if (result.valid) applyPrice(result.priceMin, result.priceMax);
+  };
+
+  /**
    * @param {string} min
    * @param {string} max
    */
   const commitPriceDraft = (min, max) => {
     const result = validatePriceDraft(min, max);
     setErrors(result.errors);
-    if (!result.valid) return;
-    setMinDraft(toDraft(result.priceMin));
-    setMaxDraft(toDraft(result.priceMax));
-    onChange({ priceMin: result.priceMin, priceMax: result.priceMax });
+    if (result.valid) {
+      setMinDraft(toDraft(result.priceMin));
+      setMaxDraft(toDraft(result.priceMax));
+      applyPrice(result.priceMin, result.priceMax);
+    }
+    priceEntryRef.current = null;
   };
 
   const commitPriceNow = () => {
@@ -106,7 +131,7 @@ export function CatalogFilters({ params, categories, onChange, onReset, ref }) {
 
     const nextMin = field === 'min' ? formatted : minDraft;
     const nextMax = field === 'max' ? formatted : maxDraft;
-    debounce.schedule(() => commitPriceDraft(nextMin, nextMax));
+    debounce.schedule(() => applyPriceWhileTyping(nextMin, nextMax));
   };
 
   useImperativeHandle(ref, () => ({
@@ -116,6 +141,7 @@ export function CatalogFilters({ params, categories, onChange, onReset, ref }) {
         commitPriceDraft(minDraft, maxDraft);
         return;
       }
+      priceEntryRef.current = null;
       setMinDraft(toDraft(params.priceMin));
       setMaxDraft(toDraft(params.priceMax));
       setErrors({});
@@ -131,6 +157,7 @@ export function CatalogFilters({ params, categories, onChange, onReset, ref }) {
 
   const handleReset = () => {
     debounce.cancel();
+    priceEntryRef.current = null;
     setMinDraft('');
     setMaxDraft('');
     setErrors({});
@@ -244,7 +271,7 @@ export function CatalogFilters({ params, categories, onChange, onReset, ref }) {
           checked={params.inStock}
           onChange={(event) => onChange({ inStock: event.target.checked })}
         />
-        <Button variant="ghost" className={styles.reset} disabled={!hasFilters} onClick={handleReset}>
+        <Button variant="danger" className={styles.reset} disabled={!hasFilters} onClick={handleReset}>
           Сбросить
         </Button>
       </div>

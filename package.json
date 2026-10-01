@@ -16,7 +16,8 @@
     "test:e2e": "playwright test",
     "test": "vitest run",
     "test:e2e:race": "playwright test e2e/search-race.spec.js --repeat-each=10",
-    "measure": "node scripts/measure-lighthouse.mjs"
+    "measure": "node scripts/measure-lighthouse.mjs",
+    "test:all": "npm run lint && npm run typecheck && npm test && npm run test:e2e"
   },
   "dependencies": {
     "react": "^19.3.0",
@@ -28,6 +29,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "chrome-launcher": "^1.2.2",
     "eslint": "^10.11.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",

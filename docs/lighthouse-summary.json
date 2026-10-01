@@ -1,0 +1,36 @@
+{
+  "url": "http://localhost:8080/",
+  "date": "2026-10-01T15:21:55.081Z",
+  "lighthouse": "13.5.0",
+  "chrome": "Chrome/154.0.0.0",
+  "formFactor": "mobile",
+  "throttling": {
+    "method": "simulate",
+    "rttMs": 150,
+    "throughputKbps": 1638.4,
+    "cpuSlowdownMultiplier": 4
+  },
+  "mockApi": {
+    "seed": 42,
+    "latency_ms": [
+      50,
+      300
+    ],
+    "error_rate": 0
+  },
+  "runs": 3,
+  "medianRun": 1,
+  "categories": {
+    "performance": 99,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100
+  },
+  "metrics": {
+    "first-contentful-paint": 1401.4813,
+    "largest-contentful-paint": 1705.0685,
+    "total-blocking-time": 50.5,
+    "cumulative-layout-shift": 0,
+    "speed-index": 1401.4813
+  }
+}

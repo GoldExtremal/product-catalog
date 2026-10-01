@@ -42,11 +42,3 @@ export function trackProductRequests(page) {
   });
   return requests;
 }
-
-/**
- * @param {number} total
- * @returns {RegExp}
- */
-export function countText(total) {
-  return new RegExp(`\\b${total}\\b`);
-}

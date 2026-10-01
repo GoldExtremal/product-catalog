@@ -57,7 +57,7 @@ test('на экране результаты последнего запроса
   await expect(page.getByTestId('state-loading')).toHaveCount(0);
   await expect(page).toHaveURL(new RegExp(`[?&]q=${lastQuery}(&|$)`));
   await expect(search).toHaveValue(lastQuery);
-  await expect(page.getByTestId('results-count')).toHaveText(new RegExp(`\\b${total}\\b`));
+  await expect(page.getByTestId('results-count')).toHaveText(String(total));
 
   const cards = page.getByTestId('product-card');
   await expect(cards).toHaveCount(items.length);
