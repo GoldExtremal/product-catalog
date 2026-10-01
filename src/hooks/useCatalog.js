@@ -34,7 +34,10 @@ export function useCatalog(queryKey) {
 
     if (productsCache.get(queryKey)) return () => controller.abort();
 
-    getProducts(new URLSearchParams(queryKey), controller.signal).then(
+    getProducts(new URLSearchParams(queryKey), {
+      signal: controller.signal,
+      canRetry: isCurrent,
+    }).then(
       (data) => {
         productsCache.set(queryKey, data);
         if (isCurrent()) setResult({ key: requestKey, data, error: null });

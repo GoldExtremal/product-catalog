@@ -17,7 +17,7 @@ import styles from './CatalogPage.module.css';
 export function CatalogPage() {
   const { params, navigate, replace } = useCatalogParams();
   const categories = useCategories();
-  const { status, data, retry } = useCatalog(toApiQuery(params));
+  const { status, data, error, retry } = useCatalog(toApiQuery(params));
 
   const handleSearch = useCallback(
     /** @param {string} q */
@@ -72,7 +72,7 @@ export function CatalogPage() {
         </p>
       )}
 
-      {status === 'error' && <ErrorState onRetry={retry} />}
+      {status === 'error' && <ErrorState error={error} onRetry={retry} />}
 
       {status === 'success' && data && data.total === 0 && <EmptyState />}
 

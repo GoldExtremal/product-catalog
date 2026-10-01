@@ -11,5 +11,5 @@ import { apiGet } from './client.js';
  * @returns {Promise<Category[]>}
  */
 export async function getCategories(signal) {
-  return /** @type {Category[]} */ (await apiGet('/categories', new URLSearchParams(), signal));
+  return /** @type {Category[]} */ (await apiGet('/categories', new URLSearchParams(), { signal }));
 }
