@@ -1,7 +1,5 @@
+import { CatalogPage } from '../pages/catalog/CatalogPage.jsx';
+
 export function App() {
-  return (
-    <main>
-      <h1>Каталог товаров</h1>
-    </main>
-  );
+  return <CatalogPage />;
 }
