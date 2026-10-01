@@ -1,0 +1,9 @@
+{
+  "name": "a2data-mock-01-product-catalog",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A2DATA · мок-сервер для тестового задания 01-product-catalog",
+  "main": "server.js",
+  "engines": { "node": ">=20" },
+  "scripts": { "start": "node server.js" }
+}

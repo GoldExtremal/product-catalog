@@ -1,0 +1,21 @@
+services:
+  mock-api:
+    build: ./mock-api
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4000/health"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+  frontend:
+    build:
+      context: .
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+    ports:
+      - "8080:80"
+    depends_on:
+      mock-api:
+        condition: service_healthy
