@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useImperativeHandle, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { Button } from '../../shared/ui/Button/Button.jsx';
 import { Checkbox } from '../../shared/ui/Checkbox/Checkbox.jsx';
@@ -13,6 +13,7 @@ import styles from './CatalogFilters.module.css';
 /** @typedef {import('../../lib/catalogParams.js').CatalogParams} CatalogParams */
 /** @typedef {import('../../hooks/useCategories.js').CategoriesState} CategoriesState */
 /** @typedef {Partial<Omit<CatalogParams, 'page' | 'q'>>} FiltersPatch */
+/** @typedef {{ flushPrice: () => void }} CatalogFiltersHandle */
 
 const SORT_OPTIONS = [
   { value: '', label: 'Сортировка' },
@@ -36,12 +37,21 @@ const toDraft = (value) => {
  *   categories: CategoriesState,
  *   onChange: (patch: FiltersPatch) => void,
  *   onReset: () => void,
+ *   ref?: import('react').Ref<CatalogFiltersHandle>,
  * }} props
  */
-export function CatalogFilters({ params, categories, onChange, onReset }) {
+export function CatalogFilters({ params, categories, onChange, onReset, ref }) {
   const [minDraft, setMinDraft] = useState(() => toDraft(params.priceMin));
   const [maxDraft, setMaxDraft] = useState(() => toDraft(params.priceMax));
   const [errors, setErrors] = useState(/** @type {{ min?: string, max?: string }} */ ({}));
+  const priceKey = `${params.priceMin}|${params.priceMax}`;
+  const [syncedPriceKey, setSyncedPriceKey] = useState(priceKey);
+  if (priceKey !== syncedPriceKey) {
+    setSyncedPriceKey(priceKey);
+    setMinDraft(toDraft(params.priceMin));
+    setMaxDraft(toDraft(params.priceMax));
+    setErrors({});
+  }
   const priceErrorId = useId();
   const priceError = [...new Set([errors.min, errors.max].filter(Boolean))].join(' ');
 
@@ -99,6 +109,19 @@ export function CatalogFilters({ params, categories, onChange, onReset }) {
     debounce.schedule(() => commitPriceDraft(nextMin, nextMax));
   };
 
+  useImperativeHandle(ref, () => ({
+    flushPrice() {
+      debounce.cancel();
+      if (validatePriceDraft(minDraft, maxDraft).valid) {
+        commitPriceDraft(minDraft, maxDraft);
+        return;
+      }
+      setMinDraft(toDraft(params.priceMin));
+      setMaxDraft(toDraft(params.priceMax));
+      setErrors({});
+    },
+  }));
+
   /** @param {import('react').KeyboardEvent<HTMLInputElement>} event */
   const handlePriceKeyDown = (event) => {
     if (event.key !== 'Enter') return;
@@ -133,16 +156,30 @@ export function CatalogFilters({ params, categories, onChange, onReset }) {
 
   return (
     <div className={styles.filters}>
-      <Select
-        className={styles.category}
-        label="Категория"
-        hideLabel
-        data-testid="filter-category"
-        options={categoryOptions}
-        value={params.category ?? ''}
-        aria-busy={categories.status === 'loading' || undefined}
-        onChange={(event) => onChange({ category: event.target.value || null })}
-      />
+      <div className={styles.category}>
+        <Select
+          label="Категория"
+          hideLabel
+          data-testid="filter-category"
+          options={categoryOptions}
+          value={params.category ?? ''}
+          aria-busy={categories.status === 'loading' || undefined}
+          onChange={(event) => onChange({ category: event.target.value || null })}
+        />
+        {categories.status === 'error' && (
+          <p className={styles.note} role="status">
+            Категории не загрузились.
+            <Button variant="ghost" className={styles.noteAction} onClick={categories.retry}>
+              Повторить
+            </Button>
+          </p>
+        )}
+        {categories.status === 'success' && categories.items.length === 0 && (
+          <p className={styles.note} role="status">
+            Список категорий пуст.
+          </p>
+        )}
+      </div>
 
       <Select
         className={styles.sort}

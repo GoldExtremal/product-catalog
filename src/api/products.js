@@ -22,9 +22,9 @@ import { apiGet } from './client.js';
 
 /**
  * @param {URLSearchParams} query
- * @param {AbortSignal} signal
+ * @param {import('./client.js').RequestOptions} options
  * @returns {Promise<ProductsResponse>}
  */
-export async function getProducts(query, signal) {
-  return /** @type {ProductsResponse} */ (await apiGet('/products', query, signal));
+export async function getProducts(query, options) {
+  return /** @type {ProductsResponse} */ (await apiGet('/products', query, options));
 }

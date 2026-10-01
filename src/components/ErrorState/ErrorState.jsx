@@ -1,15 +1,25 @@
 import { Button } from '../../shared/ui/Button/Button.jsx';
+import styles from './ErrorState.module.css';
 
 /**
- * @param {{ onRetry: () => void }} props
+ * @param {{
+ *   title: string,
+ *   message: string,
+ *   actionLabel: string,
+ *   onAction: () => void,
+ *   actionTestId?: string,
+ *   titleRef?: import('react').Ref<HTMLHeadingElement>,
+ * }} props
  */
-export function ErrorState({ onRetry }) {
+export function ErrorState({ title, message, actionLabel, onAction, actionTestId, titleRef }) {
   return (
-    <div data-testid="state-error" role="alert">
-      <h2>Не удалось загрузить товары</h2>
-      <p>Проверьте соединение и попробуйте ещё раз.</p>
-      <Button variant="primary" data-testid="retry-button" onClick={onRetry}>
-        Повторить
+    <div className={styles.error} data-testid="state-error" role="alert">
+      <h2 ref={titleRef} className={styles.title} tabIndex={-1}>
+        {title}
+      </h2>
+      <p className={styles.message}>{message}</p>
+      <Button variant="primary" data-testid={actionTestId} onClick={onAction}>
+        {actionLabel}
       </Button>
     </div>
   );

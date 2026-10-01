@@ -12,6 +12,22 @@
 
 .category {
   grid-area: category;
+  min-width: 0;
+}
+
+.note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-1);
+  margin-top: var(--space-1);
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.noteAction {
+  padding: 0 var(--space-2);
+  font-size: 0.8125rem;
 }
 
 .sort {

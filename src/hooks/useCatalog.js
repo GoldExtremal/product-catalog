@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getProducts } from '../api/products.js';
+import { createLruCache } from '../lib/cache.js';
+import { CACHE_MAX_ENTRIES, CACHE_TTL_MS } from '../constants/catalog.js';
 
 /** @typedef {import('../api/products.js').ProductsResponse} ProductsResponse */
 
@@ -10,8 +12,11 @@ import { getProducts } from '../api/products.js';
  * @property {unknown} error
  */
 
+/** @type {import('../lib/cache.js').LruCache<ProductsResponse>} */
+const productsCache = createLruCache({ maxEntries: CACHE_MAX_ENTRIES, ttlMs: CACHE_TTL_MS });
+
 /**
- * @param {string} queryKey
+ * @param {string | null} queryKey
  */
 export function useCatalog(queryKey) {
   const [retryCount, setRetryCount] = useState(0);
@@ -20,14 +25,24 @@ export function useCatalog(queryKey) {
   );
   const requestIdRef = useRef(0);
   const requestKey = `${queryKey}#${retryCount}`;
+  const cached = queryKey === null ? undefined : productsCache.peek(queryKey);
+  if (cached && result.key !== requestKey) {
+    setResult({ key: requestKey, data: cached, error: null });
+  }
 
   useEffect(() => {
     const requestId = ++requestIdRef.current;
     const controller = new AbortController();
     const isCurrent = () => requestId === requestIdRef.current && !controller.signal.aborted;
 
-    getProducts(new URLSearchParams(queryKey), controller.signal).then(
+    if (queryKey === null || productsCache.get(queryKey)) return () => controller.abort();
+
+    getProducts(new URLSearchParams(queryKey), {
+      signal: controller.signal,
+      canRetry: isCurrent,
+    }).then(
       (data) => {
+        productsCache.set(queryKey, data);
         if (isCurrent()) setResult({ key: requestKey, data, error: null });
       },
       (error) => {
@@ -40,8 +55,12 @@ export function useCatalog(queryKey) {
 
   const retry = useCallback(() => setRetryCount((n) => n + 1), []);
 
-  /** @type {'loading' | 'success' | 'error'} */
-  const status = result.key !== requestKey ? 'loading' : result.error ? 'error' : 'success';
+  /** @type {'idle' | 'loading' | 'success' | 'error'} */
+  let status = 'success';
+  if (queryKey === null) status = 'idle';
+  else if (cached) return { status, data: cached, error: null, retry };
+  else if (result.key !== requestKey) status = 'loading';
+  else if (result.error) status = 'error';
 
   return { status, data: result.data, error: result.error, retry };
 }

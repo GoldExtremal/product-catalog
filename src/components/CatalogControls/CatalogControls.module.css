@@ -10,6 +10,30 @@
   box-shadow: var(--shadow-card);
 }
 
+.searchRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.openButton {
+  width: 100%;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 var(--space-1);
+  font-size: 0.75rem;
+  color: var(--color-accent-contrast);
+  background: var(--color-accent);
+  border-radius: 999px;
+}
+
 @media (min-width: 600px) {
   .controls {
     padding: var(--space-6);
