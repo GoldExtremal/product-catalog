@@ -33,4 +33,10 @@ export default [
     },
     rules: js.configs.recommended.rules,
   },
+  {
+    files: ['e2e/**/*.js'],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.browser },
+    },
+  },
 ];
