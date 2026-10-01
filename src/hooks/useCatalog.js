@@ -16,7 +16,7 @@ import { CACHE_MAX_ENTRIES, CACHE_TTL_MS } from '../constants/catalog.js';
 const productsCache = createLruCache({ maxEntries: CACHE_MAX_ENTRIES, ttlMs: CACHE_TTL_MS });
 
 /**
- * @param {string} queryKey
+ * @param {string | null} queryKey
  */
 export function useCatalog(queryKey) {
   const [retryCount, setRetryCount] = useState(0);
@@ -25,14 +25,14 @@ export function useCatalog(queryKey) {
   );
   const requestIdRef = useRef(0);
   const requestKey = `${queryKey}#${retryCount}`;
-  const cached = productsCache.peek(queryKey);
+  const cached = queryKey === null ? undefined : productsCache.peek(queryKey);
 
   useEffect(() => {
     const requestId = ++requestIdRef.current;
     const controller = new AbortController();
     const isCurrent = () => requestId === requestIdRef.current && !controller.signal.aborted;
 
-    if (productsCache.get(queryKey)) return () => controller.abort();
+    if (queryKey === null || productsCache.get(queryKey)) return () => controller.abort();
 
     getProducts(new URLSearchParams(queryKey), {
       signal: controller.signal,
@@ -52,10 +52,12 @@ export function useCatalog(queryKey) {
 
   const retry = useCallback(() => setRetryCount((n) => n + 1), []);
 
-  if (cached) return { status: /** @type {const} */ ('success'), data: cached, error: null, retry };
-
-  /** @type {'loading' | 'success' | 'error'} */
-  const status = result.key !== requestKey ? 'loading' : result.error ? 'error' : 'success';
+  /** @type {'idle' | 'loading' | 'success' | 'error'} */
+  let status = 'success';
+  if (queryKey === null) status = 'idle';
+  else if (cached) return { status, data: cached, error: null, retry };
+  else if (result.key !== requestKey) status = 'loading';
+  else if (result.error) status = 'error';
 
   return { status, data: result.data, error: result.error, retry };
 }

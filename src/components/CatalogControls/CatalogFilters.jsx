@@ -42,6 +42,14 @@ export function CatalogFilters({ params, categories, onChange, onReset }) {
   const [minDraft, setMinDraft] = useState(() => toDraft(params.priceMin));
   const [maxDraft, setMaxDraft] = useState(() => toDraft(params.priceMax));
   const [errors, setErrors] = useState(/** @type {{ min?: string, max?: string }} */ ({}));
+  const priceKey = `${params.priceMin}|${params.priceMax}`;
+  const [syncedPriceKey, setSyncedPriceKey] = useState(priceKey);
+  if (priceKey !== syncedPriceKey) {
+    setSyncedPriceKey(priceKey);
+    setMinDraft(toDraft(params.priceMin));
+    setMaxDraft(toDraft(params.priceMax));
+    setErrors({});
+  }
   const priceErrorId = useId();
   const priceError = [...new Set([errors.min, errors.max].filter(Boolean))].join(' ');
 

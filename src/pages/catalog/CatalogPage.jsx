@@ -8,7 +8,14 @@ import { ErrorState } from '../../components/ErrorState/ErrorState.jsx';
 import { Pagination } from '../../components/Pagination/Pagination.jsx';
 import { ProductGrid } from '../../components/ProductGrid/ProductGrid.jsx';
 import { PAGE_SIZE } from '../../constants/catalog.js';
-import { DEFAULT_PARAMS, toApiQuery, withFilters, withPage } from '../../lib/catalogParams.js';
+import { describeCatalogError } from '../../lib/catalogErrors.js';
+import {
+  DEFAULT_PARAMS,
+  isPriceRangeInvalid,
+  toApiQuery,
+  withFilters,
+  withPage,
+} from '../../lib/catalogParams.js';
 import { getTotalPages } from '../../lib/pagination.js';
 import styles from './CatalogPage.module.css';
 
@@ -17,7 +24,8 @@ import styles from './CatalogPage.module.css';
 export function CatalogPage() {
   const { params, navigate, replace } = useCatalogParams();
   const categories = useCategories();
-  const { status, data, error, retry } = useCatalog(toApiQuery(params));
+  const priceRangeInvalid = isPriceRangeInvalid(params);
+  const { status, data, error, retry } = useCatalog(priceRangeInvalid ? null : toApiQuery(params));
 
   const handleSearch = useCallback(
     /** @param {string} q */
@@ -36,6 +44,11 @@ export function CatalogPage() {
     [navigate],
   );
 
+  const handlePriceReset = useCallback(
+    () => navigate((current) => withFilters(current, { priceMin: null, priceMax: null })),
+    [navigate],
+  );
+
   const handlePageChange = useCallback(
     /** @param {number} page */
     (page) => navigate((current) => withPage(current, page)),
@@ -43,6 +56,7 @@ export function CatalogPage() {
   );
 
   const totalPages = data ? getTotalPages(data.total, PAGE_SIZE) : 1;
+  const errorView = status === 'error' ? describeCatalogError(error) : null;
 
   useEffect(() => {
     if (status !== 'success' || !data || data.total === 0) return;
@@ -72,7 +86,24 @@ export function CatalogPage() {
         </p>
       )}
 
-      {status === 'error' && <ErrorState error={error} onRetry={retry} />}
+      {priceRangeInvalid && (
+        <ErrorState
+          title="Некорректный диапазон цены"
+          message="В ссылке минимальная цена больше максимальной."
+          actionLabel="Сбросить цену"
+          onAction={handlePriceReset}
+        />
+      )}
+
+      {errorView && (
+        <ErrorState
+          title={errorView.title}
+          message={errorView.message}
+          {...(errorView.action === 'retry'
+            ? { actionLabel: 'Повторить', onAction: retry, actionTestId: 'retry-button' }
+            : { actionLabel: 'Сбросить фильтры', onAction: handleFiltersReset })}
+        />
+      )}
 
       {status === 'success' && data && data.total === 0 && <EmptyState />}
 
@@ -80,7 +111,7 @@ export function CatalogPage() {
         <ProductGrid products={data.items} />
       )}
 
-      {status !== 'error' && data && data.total > 0 && (
+      {(status === 'success' || status === 'loading') && data && data.total > 0 && (
         <Pagination
           page={params.page}
           totalPages={totalPages}

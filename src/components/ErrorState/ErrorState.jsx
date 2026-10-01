@@ -1,25 +1,21 @@
-import { ApiTimeoutError } from '../../api/client.js';
 import { Button } from '../../shared/ui/Button/Button.jsx';
 
 /**
- * @param {unknown} error
- * @returns {string}
+ * @param {{
+ *   title: string,
+ *   message: string,
+ *   actionLabel: string,
+ *   onAction: () => void,
+ *   actionTestId?: string,
+ * }} props
  */
-function describe(error) {
-  if (error instanceof ApiTimeoutError) return 'Сервер слишком долго не отвечает. Попробуйте ещё раз.';
-  return 'Проверьте соединение и попробуйте ещё раз.';
-}
-
-/**
- * @param {{ error: unknown, onRetry: () => void }} props
- */
-export function ErrorState({ error, onRetry }) {
+export function ErrorState({ title, message, actionLabel, onAction, actionTestId }) {
   return (
     <div data-testid="state-error" role="alert">
-      <h2>Не удалось загрузить товары</h2>
-      <p>{describe(error)}</p>
-      <Button variant="primary" data-testid="retry-button" onClick={onRetry}>
-        Повторить
+      <h2>{title}</h2>
+      <p>{message}</p>
+      <Button variant="primary" data-testid={actionTestId} onClick={onAction}>
+        {actionLabel}
       </Button>
     </div>
   );

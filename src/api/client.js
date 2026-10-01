@@ -1,7 +1,8 @@
+import { ApiError, ApiTimeoutError, REQUEST_TIMEOUT_MS } from './errors.js';
+
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
 const ASSET_ORIGIN = new URL(API_BASE_URL, window.location.origin).origin;
 
-export const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_ATTEMPTS = 2;
 const RETRY_DELAY_MS = 500;
 
@@ -11,26 +12,6 @@ const RETRY_DELAY_MS = 500;
  */
 export function resolveAssetUrl(path) {
   return new URL(path, ASSET_ORIGIN).toString();
-}
-
-export class ApiError extends Error {
-  /**
-   * @param {number} status
-   * @param {unknown} body
-   */
-  constructor(status, body) {
-    super(`API ответил ${status}`);
-    this.name = 'ApiError';
-    this.status = status;
-    this.body = body;
-  }
-}
-
-export class ApiTimeoutError extends Error {
-  constructor() {
-    super(`API не ответил за ${REQUEST_TIMEOUT_MS / 1000} с`);
-    this.name = 'ApiTimeoutError';
-  }
 }
 
 /**
