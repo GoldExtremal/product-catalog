@@ -15,7 +15,8 @@
     "mock-api": "node mock-api/server.js",
     "test:e2e": "playwright test",
     "test": "vitest run",
-    "test:e2e:race": "playwright test e2e/search-race.spec.js --repeat-each=10"
+    "test:e2e:race": "playwright test e2e/search-race.spec.js --repeat-each=10",
+    "measure": "node scripts/measure-lighthouse.mjs"
   },
   "dependencies": {
     "react": "^19.3.0",
@@ -31,6 +32,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.13.0",
+    "lighthouse": "^13.5.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.2",
     "vitest": "^5.0.3"
