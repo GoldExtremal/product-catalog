@@ -50,7 +50,10 @@ export function useCatalog(queryKey) {
       },
     );
 
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      setResult((prev) => (prev.key === requestKey && prev.error ? { ...prev, key: null } : prev));
+    };
   }, [queryKey, requestKey]);
 
   const retry = useCallback(() => setRetryCount((n) => n + 1), []);

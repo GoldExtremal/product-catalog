@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { countText, fetchProducts, resetMockApi, trackProductRequests } from './helpers.js';
+import { fetchProducts, resetMockApi, trackProductRequests } from './helpers.js';
 
 test.beforeEach(async ({ request }) => {
   await resetMockApi(request);
@@ -16,7 +16,7 @@ async function expectCatalogState(page, expected) {
   else await expect(page.getByTestId('filter-in-stock')).not.toBeChecked();
   await expect(page.getByTestId('sort-select')).toHaveValue(expected.sort);
   await expect(page.getByTestId('state-loading')).toHaveCount(0);
-  await expect(page.getByTestId('results-count')).toHaveText(countText(expected.total));
+  await expect(page.getByTestId('results-count')).toHaveText(String(expected.total));
 }
 
 test('поиск, фильтры, сортировка и страница живут в URL и переживают reload, Back и Forward', async ({
@@ -107,7 +107,7 @@ test('возврат к уже открытой выборке берётся и
 
   const before = requests.length;
   await page.goBack();
-  await expect(page.getByTestId('results-count')).toHaveText(countText(500));
+  await expect(page.getByTestId('results-count')).toHaveText('500');
   await page.goForward();
   await expect(page.getByTestId('results-count')).toHaveText(shoesCount ?? '');
   expect(requests).toHaveLength(before);
@@ -117,11 +117,11 @@ test('пустая выдача показывает state-empty и сбрасы
   await page.goto('/?q=zzzz-нет-такого&category=shoes');
 
   await expect(page.getByTestId('state-empty')).toBeVisible();
-  await expect(page.getByTestId('results-count')).toHaveText(countText(0));
+  await expect(page.getByTestId('results-count')).toHaveText('0');
   await expect(page.getByTestId('product-card')).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Сбросить поиск и фильтры' }).click();
   await expect(page).toHaveURL('/');
   await expect(page.getByTestId('search-input')).toHaveValue('');
-  await expect(page.getByTestId('results-count')).toHaveText(countText(500));
+  await expect(page.getByTestId('results-count')).toHaveText('500');
 });

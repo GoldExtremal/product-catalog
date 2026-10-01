@@ -105,14 +105,9 @@ export function CatalogPage() {
       />
 
       <div ref={summaryRef} className={styles.summary}>
-        <p
-          ref={countRef}
-          data-testid="results-count"
-          aria-live="polite"
-          tabIndex={-1}
-          className={styles.count}
-        >
-          {status === 'success' && data ? `Найдено товаров: ${data.total}` : ''}
+        <p ref={countRef} aria-live="polite" tabIndex={-1} className={styles.count}>
+          {status === 'success' && data && 'Найдено товаров: '}
+          <span data-testid="results-count">{status === 'success' && data ? data.total : ''}</span>
         </p>
         {showUpdating && (
           <p data-testid="state-loading" role="status" className={styles.updating}>
